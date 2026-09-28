@@ -102,33 +102,173 @@ Shift telemetry hygiene **left** — intercept and mask PII at the application r
 
 ---
 
-## Quick Start
+## How to Run
+
+### Prerequisites
+
+| Requirement | Version | Check |
+|-------------|---------|-------|
+| Python | 3.10+ | `python --version` |
+| pip package: prometheus_client | any | `pip show prometheus_client` |
+| Git | any | `git --version` |
+| Grafana (optional) | 10.x | for dashboard import |
+| Prometheus (optional) | 2.x | to scrape `:8000/metrics` |
+
+Install the one Python dependency:
+```bash
+pip install prometheus_client
+```
+
+---
+
+### Option A — One-Command Demo (recommended for hackathon judges)
+
+Runs everything in a single terminal: starts the exporter, fires 7 sample log lines with real Malaysian NRICs and credit card numbers, prints the masked output, then displays the live 3-tier business metrics summary.
 
 ```bash
-# 1. Clone
-git clone https://github.com/ctin0018/Bob-A-Thon.git && cd Bob-A-Thon
+# 1. Clone the repo
+git clone https://github.com/ctin0018/Bob-A-Thon.git
+cd Bob-A-Thon
 
-# 2. Install dependencies
-pip install prometheus_client
+# 2. Run the demo
+python demo.py
+```
 
-# 3. Start the exporter
+**Expected output:**
+
+```
+[demo] Exporter started -> http://localhost:8000/metrics
+
+-----------------------------------------------------------------
+  FIRING SAMPLE LOG LINES (watch PII get masked)
+-----------------------------------------------------------------
+
+2026-09-28 [WARNING] bob-a-thon.demo -- Customer lookup: nric=880101-**-**** status=active
+2026-09-28 [WARNING] bob-a-thon.demo -- Auth failed for ic_number=991231-**-**** attempt=3
+2026-09-28 [WARNING] bob-a-thon.demo -- Payment payload: card=****-****-****-1111 amount=RM450.00
+2026-09-28 [WARNING] bob-a-thon.demo -- Amex charge: ****-****-****-0005 status=approved
+2026-09-28 [WARNING] bob-a-thon.demo -- ERROR PaymentController.charge() nric=850615-**-**** card=****-****-****-1881 FAILED
+2026-09-28 [WARNING] bob-a-thon.demo -- Health check OK: service=PaymentService latency=12ms
+
+-----------------------------------------------------------------
+  3-TIER BUSINESS OBSERVABILITY SUMMARY
+-----------------------------------------------------------------
+
+  TIER 1 -- Executive & Financial Risk
+    Total PII Breaches Prevented : 7 tokens
+    Regulatory Penalty Avoided   : RM 350,000
+    Engineering Cost Saved       : RM 224,000
+    Compliance Hygiene Rate      : 100%
+
+  TIER 2 -- Operational Velocity
+    MTTD (Now)                   : 1.0 ms  (was 14 days)
+    MTTR (Now)                   : 10 min  (was 127 min)
+
+  TIER 3 -- Service Reliability
+    Masking overhead SLO target  : < 0.5 ms per log write
+    Transaction P90 SLO target   : < 2.0 s
+    Success Rate SLO target      : >= 99.9%
+
+  Exporter still running. Open http://localhost:8000/metrics
+  Press Ctrl-C to stop.
+```
+
+While `demo.py` is running, open these URLs in your browser:
+- **http://localhost:8000/metrics** — raw Prometheus scrape endpoint (shows all `pii_*` metrics)
+- **http://localhost:8000/healthz** — health check returns `ok`
+
+---
+
+### Option B — Start Just the Exporter
+
+```bash
 python exporter.py
+# Scrape endpoint: http://localhost:8000/metrics
+# Health check:   http://localhost:8000/healthz
 
-# 4. Drop the sanitizer into your application
-python - <<'EOF'
-import logging
+# Override port or cost model via env vars:
+EXPORTER_PORT=9100 RM_PENALTY_PER_INCIDENT=75000 python exporter.py
+```
+
+---
+
+### Option C — Drop the Filter into Your Own Application
+
+```python
+# At application startup (e.g. settings.py, main.py, wsgi.py)
+from exporter import start_exporter
 from sanitizer import install_global_filter
 
-install_global_filter(service="PaymentService")
+start_exporter(port=8000, daemon=True)          # start metrics server in background
+install_global_filter(service="PaymentService") # attach filter to all log handlers
 
-logger = logging.getLogger("demo")
+# From this point on, every logger in the process is protected:
+import logging
+logger = logging.getLogger(__name__)
 logger.warning("Customer NRIC: 880101-14-5678 paid with card 4111111111111111")
-# Output: Customer NRIC: 880101-**-**** paid with card ****-****-****-1111
-# Prometheus: pii_log_interceptions_total{pii_type="NRIC",service="PaymentService",...} += 1
-#             pii_regulatory_risk_avoided_rm_total += 50000
-#             pii_engineering_cost_saved_rm_total  += 32000
-EOF
+# Logged as: Customer NRIC: 880101-**-**** paid with card ****-****-****-1111
+# Prometheus counter incremented automatically
 ```
+
+Per-handler attachment (more surgical):
+```python
+import logging
+from sanitizer import PIISanitizingFilter
+
+handler = logging.FileHandler("payments.log")
+handler.addFilter(PIISanitizingFilter(service="PaymentService", module="checkout"))
+logging.getLogger("payments").addHandler(handler)
+```
+
+---
+
+### Option D — Scan an Existing Log File
+
+```python
+from scanner import scan_file
+
+result = scan_file("/var/log/app/payment.log")
+print(f"Scanned {result.total_lines} lines")
+print(f"NRIC tokens found       : {result.nric_count}")
+print(f"Credit card tokens found: {result.credit_card_count}")
+for finding in result.findings:
+    print(f"  Line {finding.line_number}: [{finding.pii_type}] {finding.masked_value}")
+```
+
+---
+
+### Option E — Full IBM Bob Orchestration (requires Bob CLI)
+
+```bash
+chmod +x bob_run.sh
+GRAFANA_API_KEY=<your-service-token> ./bob_run.sh
+```
+
+This script:
+1. Calls `bob agent "..."` for each artefact (scanner, sanitizer, exporter, dashboard)
+2. Starts the exporter in background
+3. Auto-imports the dashboard into Grafana via the API
+4. Commits and pushes everything to GitHub
+
+---
+
+### Import the Grafana Dashboard
+
+1. Open Grafana → **Dashboards → Import**
+2. Upload [`grafana/dashboard.json`](grafana/dashboard.json)
+3. Select your **Prometheus** datasource (pointing at `:8000/metrics`)
+4. Click **Import**
+
+The dashboard opens with 4 rows and 20 panels, auto-refreshing every **10 seconds**, timezone set to **Asia/Kuala_Lumpur**.
+
+> **Prometheus scrape config** — add this to your `prometheus.yml`:
+> ```yaml
+> scrape_configs:
+>   - job_name: bob-a-thon-pii
+>     static_configs:
+>       - targets: ['localhost:8000']
+>     scrape_interval: 15s
+> ```
 
 ---
 
