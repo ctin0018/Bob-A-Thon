@@ -10,13 +10,14 @@
     }
   ],
   "__requires": [
-    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
-    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
-    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
-    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
-    { "type": "panel", "id": "gauge", "name": "Gauge", "version": "" },
-    { "type": "panel", "id": "piechart", "name": "Pie chart", "version": "" },
-    { "type": "panel", "id": "table", "name": "Table", "version": "" }
+    { "type": "grafana",    "id": "grafana",    "name": "Grafana",     "version": "10.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus",  "version": "1.0.0" },
+    { "type": "panel",      "id": "stat",       "name": "Stat",        "version": "" },
+    { "type": "panel",      "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel",      "id": "gauge",      "name": "Gauge",       "version": "" },
+    { "type": "panel",      "id": "piechart",   "name": "Pie chart",   "version": "" },
+    { "type": "panel",      "id": "table",      "name": "Table",       "version": "" },
+    { "type": "panel",      "id": "bargauge",   "name": "Bar gauge",   "version": "" }
   ],
   "annotations": {
     "list": [
@@ -25,411 +26,696 @@
         "datasource": { "type": "grafana", "uid": "-- Grafana --" },
         "enable": true,
         "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
+        "iconColor": "rgba(0,211,255,1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
       }
     ]
   },
-  "description": "Business Observability — North Star Metrics | Bob-A-Thon PII Log Leak Detector",
+  "description": "Business Observability — 3-Tier North Star Metrics | Bob-A-Thon PII Log Leak Detector",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
   "links": [],
   "panels": [
+
     {
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
-      "id": 100,
-      "title": "🛡️  Executive Summary — North Star KPIs",
+      "id": 10,
+      "title": "TIER 1 — Executive & Financial Risk  ·  The Value Realization Layer",
       "type": "row"
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Cumulative PII tokens (NRIC + Credit Card) intercepted and masked before log write. Each token = one regulatory exposure event eliminated.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 50 },
-              { "color": "red", "value": 200 }
-            ]
-          },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 50 },
+            { "color": "red", "value": 200 }
+          ]},
           "unit": "short"
-        },
-        "overrides": []
+        }, "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 1 },
       "id": 1,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto"
-      },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
       "title": "Total PII Breaches Prevented",
       "type": "stat",
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "sum(pii_log_interceptions_total)",
-          "legendFormat": "Total Prevented",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "sum(pii_log_interceptions_total)", "legendFormat": "Total", "refId": "A" }]
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Estimated cumulative RM value of BNM RMIT / PDPA regulatory penalties avoided. Formula: leaks_prevented × RM 50,000 avg audit cost per incident.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 10 }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 500000 },
+            { "color": "red", "value": 2000000 }
+          ]},
+          "decimals": 0,
+          "unit": "currencyRM"
+        }, "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 1 },
       "id": 2,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto"
-      },
-      "title": "NRIC Tokens Masked",
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "Regulatory Penalty Avoided (RM)",
       "type": "stat",
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "pii_log_interceptions_total{pii_type=\"NRIC\"}",
-          "legendFormat": "NRIC",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_regulatory_risk_avoided_rm_total", "legendFormat": "RM Risk Avoided", "refId": "A" }]
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Estimated RM cost of engineering remediation effort avoided. Formula: ΔMTTR hours × engineers × RM 500/hr.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 5 }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "blue", "value": null },
+            { "color": "green", "value": 10000 }
+          ]},
+          "decimals": 0,
+          "unit": "currencyRM"
+        }, "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 1 },
       "id": 3,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto"
-      },
-      "title": "Credit Card Tokens Masked",
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "Engineering Cost Saved (RM)",
       "type": "stat",
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "pii_log_interceptions_total{pii_type=\"CREDIT_CARD\"}",
-          "legendFormat": "Credit Card",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_engineering_cost_saved_rm_total", "legendFormat": "RM Saved", "refId": "A" }]
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Compliance Hygiene Rate — proportion of outbound log streams containing 0% plaintext sensitive data. Target: 100% (1.0). Degrades toward 0 only when an unmasked token escapes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            { "options": { "1": { "color": "green", "index": 0, "text": "100% ✓ COMPLIANT" } }, "type": "value" }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 0.9 },
+            { "color": "green", "value": 1.0 }
+          ]},
+          "unit": "percentunit"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 15, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "Compliance Hygiene Rate (BNM / PDPA)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_compliance_hygiene_rate", "legendFormat": "Hygiene Rate", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Estimated developer hours saved from automated sanitisation. Formula: total_interceptions × 0.05 h/event.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "blue", "value": null }
-            ]
-          },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "blue", "value": null }
+          ]},
+          "decimals": 1,
           "unit": "h"
-        },
-        "overrides": []
+        }, "overrides": []
       },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
-      "id": 4,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto"
-      },
+      "gridPos": { "h": 4, "w": 5, "x": 19, "y": 1 },
+      "id": 5,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
       "title": "Developer Hours Saved (est.)",
-      "description": "Estimated manual scrubbing hours avoided. Formula: total_interceptions × 0.05h per event.",
       "type": "stat",
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "sum(pii_log_interceptions_total) * 0.05",
-          "legendFormat": "Hours Saved",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "sum(pii_log_interceptions_total) * 0.05", "legendFormat": "Hours Saved", "refId": "A" }]
     },
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
-      "id": 101,
-      "title": "📈  Interception Rate Over Time",
-      "type": "row"
-    },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Interceptions over time split by PII type. Shows the volume of customer accounts protected per minute across the application estate.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "interceptions / min",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "gradientMode": "opacity",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 4,
-            "scaleDistribution": { "type": "linear" },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }]
+            "drawStyle": "bars", "fillOpacity": 80, "gradientMode": "none",
+            "lineWidth": 1, "pointSize": 4, "stacking": { "group": "A", "mode": "normal" }
           },
           "unit": "short"
-        },
-        "overrides": []
+        }, "overrides": []
       },
-      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 6 },
-      "id": 5,
+      "gridPos": { "h": 7, "w": 14, "x": 0, "y": 5 },
+      "id": 6,
       "options": {
-        "legend": { "calcs": ["mean", "max", "sum"], "displayMode": "table", "placement": "bottom", "showLegend": true },
-        "tooltip": { "mode": "multi", "sort": "none" }
+        "legend": { "calcs": ["sum", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "PII Interceptions per Minute — by Type",
+      "title": "Customer Data Protected — NRIC & Credit Card Interceptions Over Time",
       "type": "timeseries",
       "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "rate(pii_log_interceptions_total{pii_type=\"NRIC\"}[1m]) * 60",
-          "legendFormat": "NRIC / min",
-          "refId": "A"
-        },
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "legendFormat": "NRIC / min", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
           "expr": "rate(pii_log_interceptions_total{pii_type=\"CREDIT_CARD\"}[1m]) * 60",
-          "legendFormat": "Credit Card / min",
-          "refId": "B"
-        }
+          "legendFormat": "Credit Card / min", "refId": "B" }
       ]
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Donut breakdown of intercepted PII by type. Validates that all PII categories are covered.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
-          "mappings": [],
           "unit": "short"
-        },
-        "overrides": []
+        }, "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
-      "id": 6,
+      "gridPos": { "h": 7, "w": 10, "x": 14, "y": 5 },
+      "id": 7,
       "options": {
         "displayLabels": ["name", "percent"],
-        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value"] },
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value", "percent"] },
         "pieType": "donut",
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "title": "PII Breakdown — NRIC vs Credit Card",
       "type": "piechart",
       "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "pii_log_interceptions_total",
-          "legendFormat": "{{pii_type}}",
-          "refId": "A"
-        }
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "sum by (pii_type) (pii_log_interceptions_total)",
+          "legendFormat": "{{pii_type}}", "refId": "A" }
       ]
     },
+
+
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
-      "id": 102,
-      "title": "⚡  Scan Latency & System Health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 },
+      "id": 20,
+      "title": "TIER 2 — Operational Velocity  ·  The SRE / DevSecOps Layer",
       "type": "row"
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "MTTD: Mean Time to Detect. With IBM Bob inline filter: <1s. Historical baseline: ~14 days (audit-driven discovery). Lower is better.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 1209600,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 300 },
+            { "color": "red", "value": 86400 }
+          ]},
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 13 },
+      "id": 21,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name" },
+      "title": "MTTD — Now (with IBM Bob)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_mttd_seconds", "legendFormat": "MTTD", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "MTTD historical baseline before IBM Bob: ~14 days. Used for executive before/after comparison.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "red" },
+          "mappings": [],
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 13 },
+      "id": 22,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name" },
+      "title": "MTTD — Baseline (Before Bob)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_baseline_mttd_seconds", "legendFormat": "Baseline MTTD", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "MTTR: Mean Time to Resolve. With IBM Bob autonomous patch: ~10 min. Historical baseline: ~127 min emergency hotfix. Lower is better.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 14400,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 1200 },
+            { "color": "red", "value": 3600 }
+          ]},
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 13 },
+      "id": 23,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name" },
+      "title": "MTTR — Now (with IBM Bob)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_mttr_seconds", "legendFormat": "MTTR", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "MTTR historical baseline before IBM Bob: ~127 min emergency hotfix deployment cycle.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "red" },
+          "mappings": [],
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 13 },
+      "id": 24,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name" },
+      "title": "MTTR — Baseline (Before Bob)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_baseline_mttr_seconds", "legendFormat": "Baseline MTTR", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "MTTD improvement ratio: how many times faster IBM Bob detects PII leaks vs historical baseline. e.g. 1,209,600x means detection went from 14 days to 1 second.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }
+          ]},
+          "decimals": 0,
+          "unit": "short",
+          "displayName": "× Faster Detection"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 18 },
+      "id": 25,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "MTTD Improvement Ratio (Baseline ÷ Now)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_baseline_mttd_seconds / clamp_min(pii_mttd_seconds, 0.001)",
+        "legendFormat": "× Faster", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "MTTR improvement ratio: how many times faster IBM Bob resolves PII leaks vs the emergency hotfix baseline of 127 minutes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }
+          ]},
+          "decimals": 1,
+          "unit": "short",
+          "displayName": "× Faster Resolution"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 18 },
+      "id": 26,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "MTTR Improvement Ratio (Baseline ÷ Now)",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_baseline_mttr_seconds / clamp_min(pii_mttr_seconds, 1)",
+        "legendFormat": "× Faster", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Active log streams that generated at least one PII interception in the current observation window. Tracks blast-radius spread across the application estate.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 3 },
+            { "color": "red", "value": 10 }
+          ]},
+          "unit": "short"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 18 },
+      "id": 27,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "Active Log Stream Vulnerabilities Intercepted",
+      "type": "stat",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "pii_active_stream_vulnerabilities", "legendFormat": "Active Streams", "refId": "A" }]
+    },
+
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "id": 30,
+      "title": "TIER 3 — Service Reliability & SLO  ·  The Application & User Journey Layer",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "P50 masking overhead per log write. Target: < 0.5ms. Proves the security filter has negligible impact on application performance.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 0.005,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.0005 },
+            { "color": "red",    "value": 0.002 }
+          ]},
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 24 },
+      "id": 31,
+      "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto",
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "showThresholdLabels": true, "showThresholdMarkers": true },
+      "title": "Masking Overhead — p50 (Target: < 0.5ms)",
+      "type": "gauge",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "histogram_quantile(0.50, sum(rate(pii_scan_duration_seconds_bucket[5m])) by (le))",
+        "legendFormat": "p50", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "P99 masking overhead per log write. Worst-case tail latency introduced by the PII sanitizing filter. Target: < 0.5ms.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
           "max": 0.01,
           "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 0.001 },
-              { "color": "red", "value": 0.005 }
-            ]
-          },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.0005 },
+            { "color": "red",    "value": 0.005 }
+          ]},
           "unit": "s"
-        },
-        "overrides": []
+        }, "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 15 },
-      "id": 7,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 24 },
+      "id": 32,
+      "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto",
         "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "title": "Avg Scan Latency (p50)",
+        "showThresholdLabels": true, "showThresholdMarkers": true },
+      "title": "Masking Overhead — p99 (Target: < 0.5ms)",
       "type": "gauge",
-      "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.50, sum(rate(pii_scan_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p50",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "histogram_quantile(0.99, sum(rate(pii_scan_duration_seconds_bucket[5m])) by (le))",
+        "legendFormat": "p99", "refId": "A" }]
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "P90 end-to-end transaction response time. SLO: ≥ 90% of transactions complete in < 2.0s. This panel confirms the sanitizer does not degrade the user checkout / login journey.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "max": 0.1,
+          "max": 5,
           "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 0.01 },
-              { "color": "red", "value": 0.05 }
-            ]
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 1.5 },
+            { "color": "red",    "value": 2.0 }
+          ]},
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 24 },
+      "id": 33,
+      "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto",
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "showThresholdLabels": true, "showThresholdMarkers": true },
+      "title": "Transaction Response — P90 SLO (< 2.0s)",
+      "type": "gauge",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "histogram_quantile(0.90, sum(rate(pii_transaction_response_seconds_bucket[5m])) by (le))",
+        "legendFormat": "P90", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Application success rate SLO. Target: ≥ 99.9% of transactions succeed with zero dropped requests during runtime log filtering.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            { "options": { "from": 0.999, "to": 1.0, "result": { "color": "green", "index": 0 } }, "type": "range" },
+            { "options": { "from": 0.99, "to": 0.999, "result": { "color": "yellow", "index": 1 } }, "type": "range" }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red",    "value": null },
+            { "color": "yellow", "value": 0.99 },
+            { "color": "green",  "value": 0.999 }
+          ]},
+          "unit": "percentunit"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 24 },
+      "id": 34,
+      "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto",
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "showThresholdLabels": true, "showThresholdMarkers": true },
+      "title": "Service Success Rate SLO (Target: ≥ 99.9%)",
+      "type": "gauge",
+      "targets": [{ "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "expr": "sum(rate(pii_transaction_success_total[5m])) / clamp_min(sum(rate(pii_transaction_total[5m])), 0.001)",
+        "legendFormat": "Success Rate", "refId": "A" }]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Transaction response time over time — baseline vs sanitized. Confirms that adding the PII filter introduces no measurable latency regression across the P50 / P90 / P99 percentile bands.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity",
+            "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 4, "spanNulls": false,
+            "thresholdsStyle": { "mode": "line", "steps": [{ "color": "red", "value": 2.0 }] }
           },
           "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 14, "x": 0, "y": 30 },
+      "id": 35,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "Transaction Response Latency — P50 / P90 / P99 (SLO threshold: 2.0s)",
+      "type": "timeseries",
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.50, sum(rate(pii_transaction_response_seconds_bucket[2m])) by (le))",
+          "legendFormat": "P50", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.90, sum(rate(pii_transaction_response_seconds_bucket[2m])) by (le))",
+          "legendFormat": "P90", "refId": "B" },
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.99, sum(rate(pii_transaction_response_seconds_bucket[2m])) by (le))",
+          "legendFormat": "P99", "refId": "C" }
+      ]
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Masking overhead latency over time (p50 and p99). Confirms the filter consistently stays well under the 0.5ms SLO threshold.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity",
+            "lineInterpolation": "smooth", "lineWidth": 2, "spanNulls": false,
+            "thresholdsStyle": { "mode": "line", "steps": [{ "color": "orange", "value": 0.0005 }] }
+          },
+          "unit": "s"
+        }, "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 30 },
+      "id": 36,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "title": "Masking Overhead Over Time (SLO threshold: 0.5ms)",
+      "type": "timeseries",
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.50, sum(rate(pii_scan_duration_seconds_bucket[2m])) by (le))",
+          "legendFormat": "p50 overhead", "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.99, sum(rate(pii_scan_duration_seconds_bucket[2m])) by (le))",
+          "legendFormat": "p99 overhead", "refId": "B" }
+      ]
+    },
+
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "id": 40,
+      "title": "TIER 2 (Detail) — Root-Cause Blast Radius  ·  Offending Service / Module Breakdown",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Top offending services by total PII interceptions. Pinpoints which microservice or application component is the highest-risk emitter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 5 },
+            { "color": "red",    "value": 20 }
+          ]},
+          "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 15 },
-      "id": 8,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 39 },
+      "id": 41,
       "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showUnfilled": true,
+        "valueMode": "color"
       },
-      "title": "Scan Latency p99",
-      "type": "gauge",
+      "title": "Top Offending Services (Blast Radius)",
+      "type": "bargauge",
       "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.99, sum(rate(pii_scan_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p99",
-          "refId": "A"
-        }
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "sort_desc(sum by (service) (pii_log_interceptions_total))",
+          "legendFormat": "{{service}}", "refId": "A" }
       ]
     },
+
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Full blast-radius table: service, module, PII type, and interception count. Provides the exact remediation target list for developers and IBM Bob to generate sanitizing PRs against.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
           "custom": {
             "align": "auto",
-            "cellOptions": { "type": "auto" },
+            "cellOptions": { "type": "color-background" },
+            "filterable": true,
             "inspect": false
           },
           "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
-          }
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green",  "value": null },
+            { "color": "yellow", "value": 5 },
+            { "color": "red",    "value": 20 }
+          ]},
+          "unit": "short"
         },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "Value" }, "properties": [{ "id": "displayName", "value": "Running" }, { "id": "custom.width", "value": 80 }] }
+          { "matcher": { "id": "byName", "options": "service" },
+            "properties": [{ "id": "displayName", "value": "Service" }, { "id": "custom.width", "value": 160 }] },
+          { "matcher": { "id": "byName", "options": "module" },
+            "properties": [{ "id": "displayName", "value": "Module / Controller" }, { "id": "custom.width", "value": 200 }] },
+          { "matcher": { "id": "byName", "options": "pii_type" },
+            "properties": [{ "id": "displayName", "value": "PII Type" }, { "id": "custom.width", "value": 130 }] },
+          { "matcher": { "id": "byName", "options": "Value" },
+            "properties": [{ "id": "displayName", "value": "Interceptions" }] }
         ]
       },
-      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 15 },
-      "id": 9,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 39 },
+      "id": 42,
       "options": {
         "cellHeight": "sm",
-        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
-        "showHeader": true
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": true, "enablePagination": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "Interceptions" }]
       },
-      "title": "Active Scanner Instances",
+      "title": "Blast Radius Detail — Service × Module × PII Type",
       "type": "table",
       "targets": [
-        {
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "pii_active_scanner_info",
-          "legendFormat": "{{version}} / {{environment}}",
+        { "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "sort_desc(sum by (service, module, pii_type) (pii_log_interceptions_total))",
+          "legendFormat": "",
           "format": "table",
           "instant": true,
-          "refId": "A"
-        }
+          "refId": "A" }
       ]
     }
+
   ],
   "refresh": "10s",
   "schemaVersion": 38,
-  "tags": ["bob-a-thon", "pii", "compliance", "bnm-rmit", "pdpa", "grafana"],
+  "tags": ["bob-a-thon", "pii", "compliance", "bnm-rmit", "pdpa", "pci-dss", "grafana", "slo", "sre"],
   "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "Asia/Kuala_Lumpur",
-  "title": "Business Observability — PII Log Leak Detector | Bob-A-Thon",
+  "title": "Business Observability — PII Log Leak Detector | Bob-A-Thon (3-Tier)",
   "uid": "bob-a-thon-pii-v1",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

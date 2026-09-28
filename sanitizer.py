@@ -1,54 +1,51 @@
 """
-sanitizer.py — Real-Time PII Masking Logging Filter
+sanitizer.py — Real-Time PII Masking Logging Filter (3-Tier Business Observability)
 Bob-A-Thon | IBM Bob × Developer Kaki Hackathon
 
 Drop this filter onto any Python logging handler to automatically intercept
 and mask Malaysian NRICs and PCI credit card numbers before they reach disk
 or any centralised log aggregator (e.g., Elastic, Splunk, IBM QRadar).
 
+New in this version:
+  - Emits service / module blast-radius labels so Grafana Row 4 (Root-Cause
+    Blast Radius) can pin the offending service, module, and logger name.
+  - Delegates all Prometheus counter updates to exporter.record_interception()
+    so the business-layer financial metrics (RM risk avoided, cost saved) are
+    always incremented alongside the raw interception counter.
+
 Usage:
     from sanitizer import PIISanitizingFilter, install_global_filter
 
     # Option A: attach to a specific handler
     handler = logging.FileHandler("app.log")
-    handler.addFilter(PIISanitizingFilter())
+    handler.addFilter(PIISanitizingFilter(service="PaymentService", module="checkout"))
     logger.addHandler(handler)
 
     # Option B: instrument every handler on the root logger at startup
-    install_global_filter()
+    install_global_filter(service="PaymentService")
 """
 
 import logging
+import os
 import re
 from typing import Callable, List, Tuple
 
+# ---------------------------------------------------------------------------
+# Prometheus integration (graceful no-op when exporter is not imported)
+# ---------------------------------------------------------------------------
 try:
-    from prometheus_client import Counter
-    _PROMETHEUS_AVAILABLE = True
+    from exporter import record_interception as _record
+    _HAS_EXPORTER = True
 except ImportError:
-    _PROMETHEUS_AVAILABLE = False
-
-# ---------------------------------------------------------------------------
-# Metric registration (no-op when prometheus_client is absent)
-# ---------------------------------------------------------------------------
-if _PROMETHEUS_AVAILABLE:
-    PII_INTERCEPTED = Counter(
-        "pii_log_interceptions_total",
-        "Total PII tokens intercepted and masked before log write",
-        ["pii_type"],
-    )
-else:
-    class _NoOpCounter:
-        def labels(self, **_):
-            return self
-        def inc(self, *_, **__):
-            pass
-    PII_INTERCEPTED = _NoOpCounter()  # type: ignore[assignment]
+    def _record(pii_type: str, service: str = "unknown", module: str = "unknown") -> None:
+        pass
+    _HAS_EXPORTER = False
 
 
 # ---------------------------------------------------------------------------
 # Substitution rules: (compiled_pattern, label, replacement_factory)
 # ---------------------------------------------------------------------------
+
 def _nric_replacer(m: re.Match) -> str:
     clean = m.group().replace("-", "")
     return f"{clean[:6]}-**-****"
@@ -91,32 +88,44 @@ _RULES: List[Tuple[re.Pattern, str, Callable[[re.Match], str]]] = [
 class PIISanitizingFilter(logging.Filter):
     """
     A logging.Filter that mutates log record messages in-place,
-    replacing any detected PII with masked equivalents and incrementing
-    the Prometheus interception counter for each substitution.
+    replacing any detected PII with masked equivalents.
+
+    Blast-radius labels (service, module) are forwarded to the Prometheus
+    exporter so Grafana can surface the exact offending service and module.
+
+    Args:
+        service: Logical service name (e.g. "PaymentService", "AuthService").
+                 Defaults to APP_SERVICE env var, then "unknown".
+        module:  Override for the Python module label. Defaults to
+                 record.module (the filename without .py extension).
     """
 
+    def __init__(self, service: str | None = None, module: str | None = None, name: str = ""):
+        super().__init__(name)
+        self._service = service or os.getenv("APP_SERVICE", "unknown")
+        self._module_override = module  # None = derive from record.module at runtime
+
     def filter(self, record: logging.LogRecord) -> bool:
-        # Stringify the message so formatters receive clean output
         message = record.getMessage()
-        sanitized, count = self._sanitize(message)
+        module = self._module_override or record.module or "unknown"
+        sanitized, count = self._sanitize(message, self._service, module)
 
         if count:
-            # Patch the record so the final formatter emits the masked string
             record.msg = sanitized
-            record.args = ()  # args already merged into msg above
+            record.args = ()
 
-        return True  # always allow the record through (just sanitized)
+        return True  # always allow the record through
 
     @staticmethod
-    def _sanitize(text: str) -> Tuple[str, int]:
-        """Apply all PII rules, return (sanitized_text, total_replacements)."""
+    def _sanitize(text: str, service: str, module: str) -> tuple[str, int]:
+        """Apply all PII rules, increment Prometheus counters, return (sanitized_text, total)."""
         total = 0
 
         def _make_sub(label: str, replacer: Callable[[re.Match], str]):
             def _sub(m: re.Match) -> str:
                 nonlocal total
                 total += 1
-                PII_INTERCEPTED.labels(pii_type=label).inc()
+                _record(pii_type=label, service=service, module=module)
                 return replacer(m)
             return _sub
 
@@ -130,19 +139,23 @@ class PIISanitizingFilter(logging.Filter):
 # Convenience installer
 # ---------------------------------------------------------------------------
 
-def install_global_filter() -> None:
+def install_global_filter(service: str | None = None, module: str | None = None) -> None:
     """
-    Attach PIISanitizingFilter to every existing handler on the root logger.
-    Call this once at application startup (e.g., in settings.py or main.py).
+    Attach PIISanitizingFilter to every handler on the root logger.
+    Call once at application startup (e.g. in settings.py or main.py).
+
+    Args:
+        service: Logical service name forwarded as a Prometheus label.
+        module:  Optional module override; defaults to per-record derivation.
     """
     root = logging.getLogger()
-    pii_filter = PIISanitizingFilter()
+    pii_filter = PIISanitizingFilter(service=service, module=module)
     if not root.handlers:
-        # Ensure at least a basic handler exists so the filter is reachable
         logging.basicConfig()
     for handler in root.handlers:
         handler.addFilter(pii_filter)
     logging.getLogger(__name__).info(
-        "[PIISanitizer] Global PII masking filter installed on %d handler(s).",
+        "[PIISanitizer] Global PII masking filter installed on %d handler(s). service=%s",
         len(root.handlers),
+        pii_filter._service,
     )
